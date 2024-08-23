@@ -1,11 +1,84 @@
-import { Box, Flex, TextField } from '@radix-ui/themes'
-import React from 'react'
+"use client"
+
+import { PaperPlaneIcon } from '@radix-ui/react-icons'
+import { Button, Flex, IconButton, TextField } from '@radix-ui/themes'
+import React, { FormEvent, KeyboardEvent, useRef, useState } from 'react'
+
+type Input = {
+    message: string
+}
 
 export default function Footer() {
+    const [inactivityTimer, setInactivityTimer] = useState(5)
+    const timerRef = useRef<NodeJS.Timeout>()
+    const hasMessagesWaitingForResponse = useRef<boolean>(false)
+    const [inputValue, setInputValue] = useState("")
+
+    function onChangeInput(e: React.ChangeEvent<HTMLInputElement>) {
+        setInputValue(e.target.value)
+
+        if (hasMessagesWaitingForResponse.current === false) return
+
+        startTimer()
+    }
+
+    function startTimer() {
+        clearInterval(timerRef.current)
+
+        setInactivityTimer(5)
+
+        const intervalMs = 50
+
+        const intervalId = setInterval(() => {
+            setInactivityTimer((oldTimer) => {
+                const nextValue = oldTimer - (intervalMs / 1000)
+                if (nextValue > 0) return nextValue
+
+                handleRequestResponse()
+                clearInterval(intervalId)
+                return 0
+            })
+
+        }, intervalMs)
+
+        timerRef.current = intervalId
+    }
+
+    async function onSubmitMessage(e: FormEvent) {
+        e.preventDefault()
+
+        hasMessagesWaitingForResponse.current = true
+
+        setInputValue("")
+
+        startTimer()
+    }
+
+    function handleRequestResponse() {
+        console.log("envia mensagem")
+    }
+
+    function handleUserKeyPress(e: KeyboardEvent<HTMLInputElement>) {
+        if (e.key === "Enter" && e.shiftKey) {
+            e.preventDefault()
+        }
+    };
+
     return (
-        <Flex className='h-12 border-2 border-yellow-400 px-2 items-center'>
-            <TextField.Root className='w-full' placeholder='Escreva uma mensagem' >
-            </TextField.Root>
+        <Flex className='h-12 border-2 border-yellow-400 px-2'>
+            <Flex className='w-full justify-between items-center gap-x-1'>
+                <form className='flex w-full gap-x-1' onSubmit={onSubmitMessage}>
+                    <TextField.Root className='w-full' placeholder='Escreva uma mensagem' value={inputValue} name="message" onKeyDown={handleUserKeyPress} onChange={onChangeInput}>
+                    </TextField.Root>
+                    <IconButton variant="classic">
+                        <PaperPlaneIcon width="18" height="18" />
+                    </IconButton>
+
+                </form>
+                <Flex className='w-16 h-16 items-center justify-center'>
+                    {inactivityTimer.toFixed(2) + " s"}
+                </Flex>
+            </Flex>
         </Flex>
     )
 }
