@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import '@radix-ui/themes/styles.css';
 import "./globals.css"
 import { Theme } from "@radix-ui/themes";
+import TempUserSessionProvider from "@/components/TempUserSessionContext";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -21,7 +22,9 @@ export default function RootLayout({
       <body style={{ margin: 0 }} className={`${inter.className}`}>
         <main>
           <Theme>
-            {children}
+            <TempUserSessionProvider>
+              {children}
+            </TempUserSessionProvider>
           </Theme>
         </main>
       </body>
