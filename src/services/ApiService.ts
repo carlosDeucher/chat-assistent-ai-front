@@ -14,12 +14,15 @@ class ApiService {
 
         const optionsWithHeaders: AxiosRequestConfig = { ...options, headers: { "Authorization": "Bearer " + tempUserSession } }
 
-        console.log('process.env.MAIN_API_URL', process.env.NEXT_PUBLIC_MAIN_API_URL)
-        return this.axios({ url, method, ...optionsWithHeaders })
+        return this.axios({ url, method ,...optionsWithHeaders })
     }
 
     post(url: string, options: AxiosRequestConfig = {}) {
         return this.request(url, "post", options,)
+    }
+
+    get(url: string, options: AxiosRequestConfig = {}) {
+        return this.request(url, "get", options,)
     }
 }
 
