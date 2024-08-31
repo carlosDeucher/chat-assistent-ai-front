@@ -18,9 +18,11 @@ export const chatMessagesStore =
   create<ChatMessagesState>((set) => ({
     lastMessage: undefined,
     setLastMessage: (lastMessage) =>
-      set(() => ({
+     {
+      console.log("store", lastMessage)
+      return set(() => ({
         lastMessage,
-      })),
+      }))},
     messagesAreLoading: true,
     setMessagesAreLoading: (areLoading) =>
       set(() => ({

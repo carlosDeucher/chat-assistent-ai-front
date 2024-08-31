@@ -23,7 +23,7 @@ export default function MessagesList() {
   if (!messages) return <></>;
 
   return (
-    <Box className="flex-1 p-1 overflow-y-scroll">
+    <Box className="bg-secondary-light flex-1 p-1 overflow-y-scroll">
       {messages.map((message) => (
         <Message key={message.id} {...message} />
       ))}
@@ -41,10 +41,10 @@ function Message({
 
   if (role === "user") {
     dynamicRowStyle = "justify-end";
-    dynamicBoxStyle = "bg-blue-500";
+    dynamicBoxStyle = "bg-primary-main";
   } else {
     dynamicRowStyle = "justify-start";
-    dynamicBoxStyle = "bg-blue-100";
+    dynamicBoxStyle = "bg-primary-dark";
   }
 
   return (
@@ -55,10 +55,10 @@ function Message({
       <Flex
         style={{ maxWidth: "85%" }}
         className={
-          "p-1 rounded-md " + dynamicBoxStyle
+          "p-2 rounded-md " + dynamicBoxStyle
         }
       >
-        <Text>{content}</Text>
+        <Text className="text-white">{content}</Text>
       </Flex>
     </Flex>
   );

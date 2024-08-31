@@ -9,30 +9,27 @@ export default function useChatController() {
     setMessagesAreLoading,
     setMessagesError,
     addMessages,
-    lastMessage,
     setLastMessage,
   ] = chatMessagesStore((store) => [
     store.setMessagesAreLoading,
     store.setMessagesError,
     store.addMessages,
-    store.lastMessage,
     store.setLastMessage,
   ]);
 
   const companyId = params.companyId;
 
-  async function getLastMessages() {
+  async function getLastMessages(lastMessageCreationDate?: Date ) {
     try {
       setMessagesAreLoading(true);
 
       // new Date(0) = Unix Epoch January 1st, 1970 at UTC
-      const lastMessageCreationDate = lastMessage
-        ? new Date(lastMessage.createdAt)
-        : new Date(0);
+      const startDate = lastMessageCreationDate ?? new Date(0);
+         
 
       const formattedStartDate =
         encodeURIComponent(
-          lastMessageCreationDate.toISOString()
+          startDate.toISOString()
         );
       const { data } = await ApiService.get(
         `/messages/${companyId}?startDate=${formattedStartDate}`
@@ -46,6 +43,8 @@ export default function useChatController() {
 
       setLastMessage(latestLastMessage);
       addMessages(data.data.messages);
+
+      return latestLastMessage.chatId
     } catch (error) {
       setMessagesError(error);
     } finally {
@@ -64,8 +63,6 @@ export default function useChatController() {
         }
       );
 
-      await getLastMessages();
-
       return true;
     } catch (error) {
       console.error(
@@ -76,15 +73,11 @@ export default function useChatController() {
     }
   }
 
-  async function requestAnswer() {
-    if (!lastMessage)
-      throw new Error("No messages pending");
+  async function requestAnswer(chatId: string) {
     try {
       await ApiService.post(
-        `/chat/${companyId}/${lastMessage?.chatId}`
+        `/chat/${companyId}/${chatId}`
       );
-
-      await getLastMessages();
 
       return true;
     } catch (error) {

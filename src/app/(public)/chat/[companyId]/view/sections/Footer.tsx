@@ -17,8 +17,9 @@ import React, {
 import useChatController from "../../ChatController";
 
 export default function Footer() {
-  const { sendMessage, requestAnswer } =
+  const { sendMessage, requestAnswer, getLastMessages } =
     useChatController();
+  const latestChatIdRef = useRef<string>(null) 
   const [isAnswerLoading, setIsAnswerLoading] =
     useState(false);
   const [inactivityTimer, setInactivityTimer] =
@@ -70,17 +71,30 @@ export default function Footer() {
 
     hasMessagesWaitingForResponse.current = true;
 
-    sendMessage(inputValue);
-
     setInputValue("");
 
-    startTimer();
+    const messageCreationDateMocked = new Date()
+    const success = await sendMessage(inputValue);
+
+    if(success){
+      const chatId = await getLastMessages(messageCreationDateMocked);
+      latestChatIdRef.current = chatId
+
+      startTimer()
+    } 
   }
 
   async function handleRequestResponse() {
     try {
       setIsAnswerLoading(true);
-      await requestAnswer();
+
+      const chatId = latestChatIdRef.current
+      if (!chatId)
+        throw new Error("No chat pending");
+
+      const messageCreationDateMocked = new Date()
+      const success = await requestAnswer(chatId);
+      if(success)await getLastMessages(messageCreationDateMocked);
     } finally {
       setIsAnswerLoading(false);
     }
@@ -95,7 +109,7 @@ export default function Footer() {
   }
 
   return (
-    <Flex className="h-12 border-2 border-yellow-400 px-2">
+    <Flex className="h-12 border-t-2 border-secondary-main px-2 bg-secondary-light">
       <Flex className="w-full justify-between items-center gap-x-1">
         <form
           className="flex w-full gap-x-1"
@@ -116,7 +130,7 @@ export default function Footer() {
             />
           </IconButton>
         </form>
-        <Flex className="w-16 h-16 items-center justify-center">
+        <Flex className="w-16 items-center justify-center">
           {isAnswerLoading ? (
             <Spinner />
           ) : (
