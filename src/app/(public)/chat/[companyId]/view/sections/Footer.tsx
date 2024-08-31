@@ -17,9 +17,12 @@ import React, {
 import useChatController from "../../ChatController";
 
 export default function Footer() {
-  const { sendMessage, requestAnswer, getLastMessages } =
-    useChatController();
-  const latestChatIdRef = useRef<string>(null) 
+  const {
+    sendMessage,
+    requestAnswer,
+    getLastMessages,
+  } = useChatController();
+  const latestChatIdRef = useRef<string>();
   const [isAnswerLoading, setIsAnswerLoading] =
     useState(false);
   const [inactivityTimer, setInactivityTimer] =
@@ -73,28 +76,36 @@ export default function Footer() {
 
     setInputValue("");
 
-    const messageCreationDateMocked = new Date()
+    const messageCreationDateMocked = new Date();
     const success = await sendMessage(inputValue);
 
-    if(success){
-      const chatId = await getLastMessages(messageCreationDateMocked);
-      latestChatIdRef.current = chatId
+    if (success) {
+      const chatId = await getLastMessages(
+        messageCreationDateMocked
+      );
+      latestChatIdRef.current = chatId;
 
-      startTimer()
-    } 
+      startTimer();
+    }
   }
 
   async function handleRequestResponse() {
     try {
       setIsAnswerLoading(true);
 
-      const chatId = latestChatIdRef.current
+      const chatId = latestChatIdRef.current;
       if (!chatId)
         throw new Error("No chat pending");
 
-      const messageCreationDateMocked = new Date()
+      const messageCreationDateMocked =
+        new Date();
       const success = await requestAnswer(chatId);
-      if(success)await getLastMessages(messageCreationDateMocked);
+      hasMessagesWaitingForResponse.current =
+        false;
+      if (success)
+        await getLastMessages(
+          messageCreationDateMocked
+        );
     } finally {
       setIsAnswerLoading(false);
     }
