@@ -19,7 +19,6 @@ export const chatMessagesStore =
     lastMessage: undefined,
     setLastMessage: (lastMessage) =>
      {
-      console.log("store", lastMessage)
       return set(() => ({
         lastMessage,
       }))},
